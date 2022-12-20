@@ -8,3 +8,7 @@ Instructions:
 To move, you need to use the joystick. If the snake hits the wall, he will return on the parralel wall. To catch an apple, you need to walk over it.
 Used Components: 
 LCD, joystick, buzzer and the ledmatrix.
+
+Picture link: https://postimg.cc/jW5nj42m \
+Menu Video Link: https://youtu.be/bOt6c30y0Yg \
+Game Video: https://youtu.be/7BbVSKHhS7E
