@@ -18,12 +18,11 @@ byte        Desc
 #include <EEPROM.h>
 #include "LedControl.h"
 
-
 struct
 {
   char name[7];
   int score;
-}listHighScore[5],listHighScoreCopy[5];
+}listHighScore[5];
 
 #define NOTE_E4 330
 #define NOTE_G4 392
@@ -32,14 +31,8 @@ struct
 #define NOTE_C5 523
 #define NOTE_D5 587
 
-
 int notesWin[] = {
     NOTE_E4, NOTE_G4, NOTE_A4, NOTE_A4, 0,
-};
-
-int notesLose[] =
-{
-  NOTE_A4, NOTE_B4, NOTE_C5, NOTE_C5, 0,
 };
 
 // Durations (in ms) of each music note of the song
@@ -48,13 +41,8 @@ int notesLose[] =
 int durationsWin[] = {
     125, 125, 250, 125, 125
 };
-int durationLose[]={
-  125, 125, 250, 125, 125
-};
-
 
 const byte matrixSize = 8;
-
 //EEPROM
 const byte lengthHighScore = 0;
 const byte difficulty = 1;
@@ -119,6 +107,7 @@ LedControl lc = LedControl(dinPin, clockPin, loadPin, 1);
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 
 char name[] = "aaaaaa";
+char nameCopy[]="aaaaaa";//a copy of the name
 int letterPosition = 0;
 int letterValue = (int)name[letterPosition];
 
@@ -142,7 +131,7 @@ int value;           //value read from EEPROM
 int buzzInterval = 100;
 int lowerOffset = 400;
 int higherOffest = 600;
-
+bool blink = true;
 //highscore variables
 int numberOfChr = 0;
 bool generated = false;  //if the apple was generated
@@ -196,21 +185,34 @@ byte block[8] = {
 	0b11111
 };
 
+//String options2[] = {"Enter name","Difficulty","LCD contrast","LCD brightness","Matrix brightness","Sound on/off"};
+
 byte playFigure[8]={0x00,0x60,0x78,0x7C,0x7C,0x78,0x60,0x00};
 byte highScoreFigure[8] = {0x00,0x7E,0x42,0x3C,0x18,0x18,0x3C,0x00};
 byte settingsFigure[8] = { 0x00,0x3E,0x7E,0x0C,0x0C,0x0C,0x0C,0x00 };
 byte aboutFigure[8] = {0x00,0x8F,0x8C,0xDF,0xAC,0x8F,0x00,0x00};
 byte howToPlayFigure[8]={0x00,0x1C,0x22,0x02,0x04,0x08,0x00,0x08};
 byte resetFigure[8]={0x81,0x42,0x24,0x18,0x18,0x24,0x42,0x81};
-byte character [8];
+byte nameFigure[8]={0x00,0x24,0x34,0x2C,0x24,0x00,0x7E,0x00};
+byte difficultyFigure[8]={0x00,0x30,0x28,0x28,0x30,0x00,0x7E,0x00};
+byte lcFigure[8]={0x00,0x46,0x48,0x48,0x76,0x00,0x7E,0x00};
+byte lbFigure[8]={0x4C,0x4A,0x4E,0x4A,0x6C,0x00,0x7E,0x00};
+byte mbFigure[8]={0x44,0x6C,0x54,0x44,0x44,0x00,0x7C,0x00};
+byte soundFigure[8]={0x04,0x22,0x69,0xE5,0xE5,0x69,0x22,0x04};
 
+
+//Upper and lower limits for map
+byte lowerLimitSettingsLevelLCD = 0;
+byte upperLimitSettingsLevelLCD = 16;
+byte lowerLimitSettingsLevelANALOG = 0;
+byte upperLimitSettingsLevelANALOG = 255;
 void setup() {
   Serial.begin(9600);
  // String cc = "marius:1000, ion:2000           \n";
  // EEPROM.update(0, cc.length());
  // EEPROM.put(128, "marius:1000, ion:2000           \n");
   //listHighScore[0].name = "1asda";
-
+  /*
   strcpy(listHighScore[0].name,"marius");
   listHighScore[0].score = 8;
   
@@ -227,7 +229,7 @@ void setup() {
   listHighScore[4].score = 1;
 
   EEPROM.put(startHighScore,listHighScore);
-
+*/
   setLCD();  //set the initial values for contrast and brightness
   length[0].x = 0;
   length[0].y = 0;
@@ -297,22 +299,22 @@ void menu() {
   if (shown == false) {
     int i;
     if(position == 0)
-      for(i=0;i<8;i++)
+      for(i=0;i<matrixSize;i++)
         lc.setRow(0,i,playFigure[i]);
     if(position == 1)
-      for(i=0;i<8;i++)
+      for(i=0;i<matrixSize;i++)
         lc.setRow(0,i,highScoreFigure[i]);
     if(position == 2)
-      for(i=0;i<8;i++)
+      for(i=0;i<matrixSize;i++)
         lc.setRow(0,i,settingsFigure[i]);
     if(position == 3)
-      for(i=0;i<8;i++)
+      for(i=0;i<matrixSize;i++)
         lc.setRow(0,i,aboutFigure[i]);
     if(position == 4)
-      for(i=0;i<8;i++)
+      for(i=0;i<matrixSize;i++)
         lc.setRow(0,i,howToPlayFigure[i]);
     if(position == 5)
-      for(i=0;i<8;i++)
+      for(i=0;i<matrixSize;i++)
         lc.setRow(0,i,resetFigure[i]);
     
     lcd.clear();
@@ -351,11 +353,10 @@ void startGame() {
       lastTimeInteractionSnake = millis();
       shown = false;
 
-      
       //fruit generator
       if (generated == false) {
-        xApple = 3;
-        yApple = 3;
+        //xApple = 3;
+        //yApple = 3;
         bool ok = false;
         while (ok == false) {
           ok = true;
@@ -416,15 +417,15 @@ void startGame() {
         case 2: ySnake++; break;
         case 3: xSnake--; break;
       }
-      if (ySnake == 8)
+      if (ySnake == matrixSize)
         ySnake = 0;
       if (ySnake == -1)
-        ySnake = 8;
+        ySnake = matrixSize;
 
-      if (xSnake == 8)
+      if (xSnake == matrixSize)
         xSnake = 0;
       if (xSnake == -1)
-        xSnake = 8;
+        xSnake = matrixSize;
 
 
       //refrshing screen
@@ -449,24 +450,24 @@ void startGame() {
             nm=nm/10;
             ct1++;
           }
+          playWinSong();
           snprintf(buf, 10, "%d", score);
           strcat(str,buf);
           strcat(str," score");
           writeToRow2(str,29+ct1);
-          EEPROM.get(startHighScore,listHighScoreCopy);
+          EEPROM.get(startHighScore,listHighScore);
           for(int i = 0;i<5;i++)
-            if(listHighScoreCopy[i].score <score){
+            if(listHighScore[i].score <score){
               for(int j = 4;j>i;j--)
               {
-                listHighScoreCopy[i].score = listHighScoreCopy[i-1].score;
-                strcpy(listHighScoreCopy[i].name,listHighScoreCopy[i-1].name);
+                listHighScore[i].score = listHighScore[i-1].score;
+                strcpy(listHighScore[i].name,listHighScore[i-1].name);
               }
-              listHighScoreCopy[i].score =score;
-              strcpy(listHighScoreCopy[i].name,name);
-              EEPROM.put(startHighScore,listHighScoreCopy);
+              listHighScore[i].score =score;
+              strcpy(listHighScore[i].name,name);
+              EEPROM.put(startHighScore,listHighScore);
               i=5; // stop
             }
-          playWinSong();
           lcd.clear();
           lcd.setCursor(0, 0);
           lcd.print("Game over");
@@ -532,7 +533,7 @@ void startGame() {
 void highscore() {
   xValue = analogRead(pinX);
   if (read == false) {
-    EEPROM.get(startHighScore,listHighScoreCopy);
+    EEPROM.get(startHighScore,listHighScore);
     read = true;
   }
   if (shown == false) {
@@ -544,20 +545,21 @@ void highscore() {
     int ct1 = 0;
     for(int i =0;i<6;i++)
     {
-      strcat(str,listHighScoreCopy[i].name);
+      strcat(str,listHighScore[i].name);
       strcat(str,":");
-      nm = listHighScoreCopy[i].score;
+      nm = listHighScore[i].score;
       while(nm!=0)
       {
         nm=nm/10;
         ct1++;
       }
       numberOfChr +=ct1;
-      snprintf(buf, 10, "%d", listHighScoreCopy[i].score);  
+      snprintf(buf, 10, "%d", listHighScore[i].score);  
       strcat (str, buf);
       strcat(str," ");
     }
-    writeToRow2(str, numberOfChr);
+    strcat(str,"\0");
+    writeToRow2(str, strlen(str));
     lastShown = millis();
     shown = true;
   }
@@ -612,6 +614,27 @@ void settings() {
     waitInteraction();
     lcd.clear();
     lcd.print(options2[position2]);
+
+    int i;
+    if(position2 == 0)
+      for(i=0;i<matrixSize;i++)
+        lc.setRow(0,i,nameFigure[i]);
+    if(position2 == 1)
+      for(i=0;i<matrixSize;i++)
+        lc.setRow(0,i,difficultyFigure[i]);
+    if(position2 == 2)
+      for(i=0;i<matrixSize;i++)
+        lc.setRow(0,i,lcFigure[i]);
+    if(position2 == 3)
+      for(i=0;i<matrixSize;i++)
+        lc.setRow(0,i,lbFigure[i]);
+    if(position2 == 4)
+      for(i=0;i<matrixSize;i++)
+        lc.setRow(0,i,mbFigure[i]);
+    if(position2 == 5)
+      for(i=0;i<matrixSize;i++)
+        lc.setRow(0,i,soundFigure[i]);
+
     if(position2>0)
     {
       lcd.setCursor(15, 0);
@@ -699,10 +722,10 @@ void reset() {
   if(xValue<lowerOffset && numberOfChr!=0)
   {
     for(int i=0;i<6;i++){
-      strcpy(listHighScoreCopy[i].name,"");
-      listHighScoreCopy[i].score = 0;
+      strcpy(listHighScore[i].name,"");
+      listHighScore[i].score = 0;
     }
-    EEPROM.put(startHighScore,listHighScoreCopy);
+    EEPROM.put(startHighScore,listHighScore);
     EEPROM.put(lengthHighScore,0);
   }
   
@@ -727,23 +750,6 @@ void message() {
 }
 
 //A function that will write on the second row a given word
-void writeToRow1(String word) {
-  lcd.clear();
-  lcd.setCursor(16, 1);
-  lcd.autoscroll();
-  int thisChar = 0;
-  unsigned long delay = higherOffest;
-  unsigned long waitedTime = 0;
-  while (thisChar < word.length()) {
-    if (millis() - waitedTime > delay) {
-      lcd.print(word[thisChar]);
-      waitedTime = millis();
-      thisChar++;
-    }
-  }
-  lcd.noAutoscroll();
-}
-
 void writeToRow2(char cuv[], int number) {
   lcd.setCursor(0, 1);
   char ecran[] = "                ";
@@ -843,7 +849,26 @@ void EnterName() {
     lcd.print(name);
     shown = true;
     waitInteraction();
+    strcpy(nameCopy,name);
   }
+  
+  if(millis() - lastTimeForLetter > timeForLetter)
+  {
+    switch(blink)
+    {
+      case true:nameCopy[letterPosition] = (char)letterValue;break;
+      case false:nameCopy[letterPosition] = ' ';break;
+    }
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("      Name");
+    lcd.setCursor(0, 1);
+    lcd.print(nameCopy);
+    
+    lastTimeForLetter = millis();
+    blink = !blink;
+  }
+
   if (joyMoved == true && yValue > lowerOffset && yValue < higherOffest && xValue > lowerOffset && xValue < higherOffest)
     joyMoved = false;
 }
@@ -930,7 +955,7 @@ void LCD_contrast() {
 
   if (shown == false) {
     lcd.clear();
-    analogWrite(LCD_Contrast, map(lcdContrastLevel, 0, 16, 0, 255));
+    analogWrite(LCD_Contrast, map(lcdContrastLevel, lowerLimitSettingsLevelLCD, upperLimitSettingsLevelLCD, lowerLimitSettingsLevelANALOG, upperLimitSettingsLevelANALOG));
     lcd.setCursor(0, 0);
     lcd.print("   LCD Contrast");
     lcd.setCursor(0, 1);
@@ -986,7 +1011,7 @@ void LCD_brightness() {
       lcd.write((byte)2);
     shown = true;
 
-    analogWrite(LCD_Backlight, map(lcdBrightnessLevel, 0, 16, 0, 255));
+    analogWrite(LCD_Backlight, map(lcdBrightnessLevel, lowerLimitSettingsLevelLCD, upperLimitSettingsLevelLCD, lowerLimitSettingsLevelANALOG, upperLimitSettingsLevelANALOG));
   }
 
   if (xValue > higherOffest) {
@@ -1101,20 +1126,21 @@ void initializeMatrix(bool valueFor) {
     }
   }
 }
+
 void waitInteraction() {
   lastTimeInteraction = millis();
   while (millis() - lastTimeInteraction < TimeInteraction) {}
 }
+
 void setLCD() {
   lcdContrastLevel = EEPROM.read(lcdContrast);
   lcdBrightnessLevel = EEPROM.read(lcdBrightness);
   soundLevel = EEPROM.read(sounds);
   difficultyLevel = EEPROM.read(difficulty);
   matrixBrightnessLevel = EEPROM.read(matrixBrightness);
-  analogWrite(LCD_Contrast, map(lcdContrastLevel, 0, 16, 0, 255));
-  analogWrite(LCD_Backlight, map(lcdBrightnessLevel, 0, 16, 0, 255));
+  analogWrite(LCD_Contrast, map(lcdContrastLevel, lowerLimitSettingsLevelLCD, upperLimitSettingsLevelLCD, lowerLimitSettingsLevelANALOG, upperLimitSettingsLevelANALOG));
+  analogWrite(LCD_Backlight, map(lcdBrightnessLevel, lowerLimitSettingsLevelLCD, upperLimitSettingsLevelLCD, lowerLimitSettingsLevelANALOG, upperLimitSettingsLevelANALOG));
   
-
   switch (difficultyLevel) {
       case 0: TimeInteractionSnake = 200;break;
       case 1: TimeInteractionSnake = 130;break;
@@ -1133,13 +1159,9 @@ void playWinSong()
     float wait = durationsWin[i] / songSpeed;
     // Play tone if currentNote is not 0 frequency, otherwise pause (noTone)
     if (currentNote != 0)
-    {
       tone(buzzerPin, notesWin[i], wait); // tone(pin, frequency, duration)
-    }
     else
-    {
       noTone(buzzerPin);
-    }
     // delay is used to wait for tone to finish playing before moving to next loop
     waitInteraction();
   }
