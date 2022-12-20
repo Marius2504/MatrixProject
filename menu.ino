@@ -441,6 +441,7 @@ void startGame() {
           if (xSnake == length[i].x && ySnake == length[i].y)
             GameOver = true;
         if (GameOver == true) {
+          int okk=0;
           char str[100]="Congratulations on reaching ";
           char buf[10] = {};
           int nm = score;
@@ -458,6 +459,9 @@ void startGame() {
           EEPROM.get(startHighScore,listHighScore);
           for(int i = 0;i<5;i++)
             if(listHighScore[i].score <score){
+              okk =1;
+              if(i==1)
+                okk =2;
               for(int j = 4;j>i;j--)
               {
                 listHighScore[i].score = listHighScore[i-1].score;
@@ -471,6 +475,11 @@ void startGame() {
           lcd.clear();
           lcd.setCursor(0, 0);
           lcd.print("Game over");
+          if(okk==1)
+            lcd.print(" Top 5");
+          if(okk==2)
+            lcd.print(" BEST");
+
           lcd.setCursor(0, 1);
           lcd.print("Score:");
           lcd.print(score);
