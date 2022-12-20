@@ -543,7 +543,7 @@ void highscore() {
     char buf[10] = {};
     int nm = 0;
     int ct1 = 0;
-    for(int i =0;i<6;i++)
+    for(int i =0;i<5;i++)
     {
       strcat(str,listHighScore[i].name);
       strcat(str,":");
