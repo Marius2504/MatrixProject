@@ -344,6 +344,14 @@ void menu() {
 }
 
 void startGame() {
+
+  for (int i = 0; i < lengthSnake; i++){
+    Serial.print(length[i].x);
+    Serial.print("-");
+    Serial.print(length[i].y);
+    Serial.print(" ");
+  }
+  Serial.println(" ");
   xValue = analogRead(pinX);
   yValue = analogRead(pinY);
   swValue = !digitalRead(pinSW);
@@ -420,12 +428,12 @@ void startGame() {
       if (ySnake == matrixSize)
         ySnake = 0;
       if (ySnake == -1)
-        ySnake = matrixSize;
+        ySnake = matrixSize-1;
 
       if (xSnake == matrixSize)
         xSnake = 0;
       if (xSnake == -1)
-        xSnake = matrixSize;
+        xSnake = matrixSize-1;
 
 
       //refrshing screen
@@ -728,7 +736,7 @@ void reset() {
       
     }
   }
-  if(xValue<lowerOffset && numberOfChr!=0)
+  if(xValue<lowerOffset)
   {
     for(int i=0;i<6;i++){
       strcpy(listHighScore[i].name,"");
