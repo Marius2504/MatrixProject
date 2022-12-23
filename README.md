@@ -10,5 +10,5 @@ To move, you need to use the joystick. If the snake hits the wall, he will retur
 LCD, joystick, buzzer and the ledmatrix.
 
 Picture link: https://postimg.cc/jW5nj42m \
-Menu Video Link: https://www.youtube.com/watch?v=NFjUcchvuRA\
+Menu Video Link: https://www.youtube.com/watch?v=NFjUcchvuRA \
 Game Video: https://youtu.be/NFjUcchvuRA
