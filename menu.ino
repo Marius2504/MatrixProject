@@ -344,14 +344,6 @@ void menu() {
 }
 
 void startGame() {
-
-  for (int i = 0; i < lengthSnake; i++){
-    Serial.print(length[i].x);
-    Serial.print("-");
-    Serial.print(length[i].y);
-    Serial.print(" ");
-  }
-  Serial.println(" ");
   xValue = analogRead(pinX);
   yValue = analogRead(pinY);
   swValue = !digitalRead(pinSW);
@@ -381,7 +373,7 @@ void startGame() {
 
       //movement logic
       if (joyMoved == false) {
-        if (yValue < lowerOffset && length[lengthSnake - 2].y != ySnake - 1) {
+        if (yValue < lowerOffset && nextMove!=2 &&length[lengthSnake - 2].y != ySnake - 1) {
           if (soundLevel == true)
             tone(buzzerPin, buzzerTone1, buzzInterval);
           //ySnake--;
@@ -389,7 +381,7 @@ void startGame() {
           joyMoved = true;
           //shown = false;
         }
-        if (yValue > higherOffest && length[lengthSnake - 2].y != ySnake + 1) {
+        if (yValue > higherOffest&& nextMove!=0 && length[lengthSnake - 2].y != ySnake + 1) {
           if (soundLevel == true)
             tone(buzzerPin, buzzerTone1, buzzInterval);
           //ySnake++;
@@ -397,7 +389,7 @@ void startGame() {
           joyMoved = true;
           //shown = false;
         }
-        if (xValue < lowerOffset && length[lengthSnake - 2].x != xSnake + 1) {
+        if (xValue < lowerOffset&& nextMove!=3 && length[lengthSnake - 2].x != xSnake + 1) {
           if (soundLevel == true)
             tone(buzzerPin, buzzerTone1, buzzInterval);
           //xSnake++;
@@ -405,7 +397,7 @@ void startGame() {
           joyMoved = true;
           // shown = false;
         }
-        if (xValue > higherOffest && length[lengthSnake - 2].x != xSnake - 1) {
+        if (xValue > higherOffest&& nextMove!=1 && length[lengthSnake - 2].x != xSnake - 1) {
           if (soundLevel == true)
             tone(buzzerPin, buzzerTone1, buzzInterval);
           //xSnake--;
@@ -435,13 +427,33 @@ void startGame() {
       if (xSnake == -1)
         xSnake = matrixSize-1;
 
+      if (xSnake == xApple && ySnake == yApple) {
+          tone(buzzerPin, buzzerTone1, buzzInterval);
+          tone(buzzerPin, buzzerTone2, buzzInterval);
+          tone(buzzerPin, buzzerTone3, buzzInterval);
+          score++;
+          if(difficultyLevel >1)
+            score ++;
+          lengthSnake++;
+          for (int i = lengthSnake - 1; i > 0; i--)
+            length[i] = length[i - 1];
+          generated = false;  // the positions of fruit will be changed
+          shown == false;
+        }
 
       //refrshing screen
       if (shown == false) {
         lcd.clear();
         lcd.setCursor(0, 0);
-        lcd.print("    Score : ");
+        lcd.print("Score:");
         lcd.print(score);
+        lcd.print(" ");
+        switch (difficultyLevel) {
+          case 0: lcd.print("Easy"); break;
+          case 1: lcd.print("Med"); break;
+          case 2: lcd.print("Hard"); break;
+          case 3: lcd.print("Imp"); break;
+        }
         lcd.setCursor(0, 1);
         lcd.print("Name:");
         lcd.print(name);
@@ -465,15 +477,18 @@ void startGame() {
           strcat(str," score");
           writeToRow2(str,29+ct1);
           EEPROM.get(startHighScore,listHighScore);
+          
+          
           for(int i = 0;i<5;i++)
             if(listHighScore[i].score <score){
               okk =1;
               if(i==1)
                 okk =2;
+              
               for(int j = 4;j>i;j--)
               {
-                listHighScore[i].score = listHighScore[i-1].score;
-                strcpy(listHighScore[i].name,listHighScore[i-1].name);
+                listHighScore[j].score = listHighScore[j-1].score;
+                strcpy(listHighScore[j].name,listHighScore[j-1].name);
               }
               listHighScore[i].score =score;
               strcpy(listHighScore[i].name,name);
@@ -507,27 +522,24 @@ void startGame() {
           length[2].x = 2;
           length[2].y = 0;
         }
-        
-        if (xSnake == xApple && ySnake == yApple) {
-          tone(buzzerPin, buzzerTone1, buzzInterval);
-          tone(buzzerPin, buzzerTone2, buzzInterval);
-          tone(buzzerPin, buzzerTone3, buzzInterval);
-          score++;
-          if(difficultyLevel >1)
-            score ++;
-          lengthSnake++;
-          for (int i = lengthSnake - 1; i > 0; i--)
-            length[i] = length[i - 1];
-          generated = false;  // the positions of fruit will be changed
-        }
         initializeMatrix(false);
         for (int i = 0; i < lengthSnake - 1; i++)
           length[i] = length[i + 1];
         length[lengthSnake - 1].x = xSnake;
         length[lengthSnake - 1].y = ySnake;
 
+        if(difficultyLevel >2)
+        {
+          if(millis() - lastTimeForLetter > timeForLetter){
+            lastTimeForLetter = millis();
+            blink = !blink;
+          }
+        }
+        else
+          blink = true;
+
         for (int i = 0; i < lengthSnake; i++)
-          lc.setLed(0, length[i].y, length[i].x, true);
+          lc.setLed(0, length[i].y, length[i].x, blink);
         lc.setLed(0, yApple, xApple, true);
         shown = true;
       }
@@ -724,26 +736,22 @@ void howToPlay() {
 void reset() {
   xValue = analogRead(pinX);
   if (shown == false) {
-    EEPROM.get(lengthHighScore,numberOfChr);
-    if (numberOfChr == 0) {
-      lcd.clear();
-      lcd.print("Null score");
-      shown = true;
-    } else {
-      lcd.clear();
-      lcd.print("Reset highscores?");
-      shown = true;
-      
-    }
+    lcd.clear();
+    lcd.print("Reset highscores?");
+    shown = true;
   }
   if(xValue<lowerOffset)
   {
+    if (soundLevel == true)
+        tone(buzzerPin, buzzerTone1, buzzInterval);
     for(int i=0;i<6;i++){
-      strcpy(listHighScore[i].name,"");
+      strcpy(listHighScore[i].name,"empty");
       listHighScore[i].score = 0;
     }
     EEPROM.put(startHighScore,listHighScore);
     EEPROM.put(lengthHighScore,0);
+    lcd.clear();
+    lcd.print("Highscore reseted");
   }
   
   if (joyMoved == true && yValue > lowerOffset && yValue < higherOffest && xValue > lowerOffset && xValue < higherOffest)
@@ -933,9 +941,9 @@ void Difficulty() {
     EEPROM.update(difficulty, difficultyLevel);
     switch (difficultyLevel) {
       case 0: TimeInteractionSnake = 200;break;
-      case 1: TimeInteractionSnake = 130;break;
-      case 2: TimeInteractionSnake = 80;break;
-      case 3: TimeInteractionSnake = 50;break;
+      case 1: TimeInteractionSnake = 170;break;
+      case 2: TimeInteractionSnake = 150;break;
+      case 3: TimeInteractionSnake = 100;break;
     }
 
     state2 = 0;  //because state = 0 is for menu
@@ -1160,9 +1168,9 @@ void setLCD() {
   
   switch (difficultyLevel) {
       case 0: TimeInteractionSnake = 200;break;
-      case 1: TimeInteractionSnake = 130;break;
-      case 2: TimeInteractionSnake = 80;break;
-      case 3: TimeInteractionSnake = 50;break;
+      case 1: TimeInteractionSnake = 170;break;
+      case 2: TimeInteractionSnake = 150;break;
+      case 3: TimeInteractionSnake = 100;break;
     }
 }
 
