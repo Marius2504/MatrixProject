@@ -11,4 +11,4 @@ LCD, joystick, buzzer and the ledmatrix.
 
 Picture link: https://postimg.cc/jW5nj42m \
 Menu Video Link: https://www.youtube.com/watch?v=NFjUcchvuRA \
-Game Video: https://youtu.be/NFjUcchvuRA
+Game Video: https://www.youtube.com/watch?v=7BbVSKHhS7E
