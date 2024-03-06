@@ -11,7 +11,7 @@ To move, you need to use the joystick. If the snake hits the wall, he will retur
 ### :wrench: Used Components: 
 LCD, joystick, buzzer and the ledmatrix.
 
-:camera: Aspect
+### :camera: Aspect
 Picture link: https://postimg.cc/jW5nj42m \
 Menu Video Link: https://www.youtube.com/watch?v=NFjUcchvuRA \
 Game Video: https://www.youtube.com/watch?v=7BbVSKHhS7E
