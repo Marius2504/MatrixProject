@@ -12,6 +12,9 @@ To move, you need to use the joystick. If the snake hits the wall, he will retur
 LCD, joystick, buzzer and the ledmatrix.
 
 ### :camera: Aspect
+<p align="left">
+ <img src="https://github.com/Marius2504/MatrixProject/blob/main/photomenu.jpg" width="600">
+</p>
 Picture link: https://postimg.cc/jW5nj42m \
 Menu Video Link: https://www.youtube.com/watch?v=NFjUcchvuRA \
 Game Video: https://www.youtube.com/watch?v=7BbVSKHhS7E
