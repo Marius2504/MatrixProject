@@ -15,6 +15,7 @@ LCD, joystick, buzzer and the ledmatrix.
 <p align="left">
  <img src="https://github.com/Marius2504/MatrixProject/blob/main/photomenu.jpg" width="600">
 </p>
-\
-Menu Video Link: https://www.youtube.com/watch?v=NFjUcchvuRA \
-Game Video: https://www.youtube.com/watch?v=7BbVSKHhS7E
+
+Menu Video Link: [https://www.youtube.com/watch?v=NFjUcchvuRA](https://www.youtube.com/watch?v=NFjUcchvuRA)
+
+Game Video: [https://www.youtube.com/watch?v=7BbVSKHhS7E](https://www.youtube.com/watch?v=7BbVSKHhS7E)
